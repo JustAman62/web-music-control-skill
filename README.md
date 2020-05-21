@@ -8,7 +8,7 @@ Sends commands to a locally hosted web-based music player. designed for use with
 * "Play before you go"
 * "Play the song before you go"
 * "Play songs by lewis capaldi"
-* "Play my car playlistr"
+* "Play my car playlist"
 * "Play the playlist car"
 * "Play before you go by lewis capaldi"
 * "Play the song before you go by lewis capaldi"
@@ -29,5 +29,5 @@ Iot
 ## Tags
 #Apple music
 #Music
-#Web control
+#Web Music Control
 

@@ -2,6 +2,7 @@ import re
 
 from mycroft import intent_file_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
+from mycroft.messagebus.message import Message
 
 # When a query is not fulfilled
 NOTHING_FOUND = (CPSMatchLevel.GENERIC, {'type': 'something'})
@@ -53,6 +54,20 @@ class WebMusicControl(CommonPlaySkill):
                 return phrase, CPSMatchLevel.EXACT, data
             else:
                 return phrase, CPSMatchLevel.MULTI_KEY, data
+
+    def CPS_start(self, phrase, data):
+        self.log.debug("Attempting to request playback on web client")
+        if not self.client_connected():
+            self.log.info("No web clients connected, cannot request playback")
+            return
+
+        if data.get('type') is not None:
+            message = Message('web_client:play', data)
+            self.log.debug("Sending message to web client %s" % message)
+            self.bus.emit(message)
+            # TODO: Listen for web client response to tailor speech
+            self.speak_dialog('Playing')
+
 
     # endregion
 
@@ -112,6 +127,11 @@ class WebMusicControl(CommonPlaySkill):
     # region UTIL
 
     def client_connected(self):
+        """
+        Checks to see if there are any clients connected.
+
+        No requests to clients should be sent if this returns False
+        """
         # TODO: Check if client is connected
         return True
 

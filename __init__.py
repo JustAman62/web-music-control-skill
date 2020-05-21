@@ -62,7 +62,7 @@ class WebMusicControl(CommonPlaySkill):
             return
 
         if data.get('type') is not None:
-            message = Message('web_client:play', data)
+            message = Message('web-music-control:play', data)
             self.log.debug("Sending message to web client %s" % message)
             self.bus.emit(message)
             # TODO: Listen for web client response to tailor speech

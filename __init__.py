@@ -85,7 +85,7 @@ class WebMusicControl(CommonPlaySkill):
             elif song_name and album_name:
                 data = {"type": "songs+albums", "name": "%s %s" % (song_name, album_name)}
             elif song_name and artist_name:
-                data = {"type": "songs+artists", "name": "%s by %s" % (song_name, artist_name)}
+                data = {"type": "songs", "name": "%s %s" % (song_name, artist_name)}
             elif song_name:
                 data = {"type": "songs", "name": song_name}
             elif album_name:
@@ -194,6 +194,7 @@ class WebMusicControl(CommonPlaySkill):
                     string = f.read().strip()
                 self.regexes[regex_name] = string
         return self.regexes[regex_name]
+
 
 
 def create_skill():

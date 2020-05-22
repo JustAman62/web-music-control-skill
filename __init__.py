@@ -43,7 +43,7 @@ class WebMusicControl(CommonPlaySkill):
 
         # TODO: Maybe support more client names
         client_specified = 'apple music' in phrase
-        bonus = 0.5 if client_specified else 0.1
+        conf_threshold = 0.7 if client_specified else 0.5
 
         # Remove the 'on client' part of the phrase
         phrase = re.sub(self.translate_regex('on_client'), '', phrase)
@@ -51,6 +51,46 @@ class WebMusicControl(CommonPlaySkill):
         intent_data = self.intent_container.calc_intent("play " + phrase)
         self.log.info("padatious intent parse results")
         self.log.info(intent_data)
+
+        if intent_data.conf < 0.5:
+            self.log.info("Intent confidence too low")
+            return None
+
+        intent_name = intent_data.name
+        matches = intent_data.matches
+        level = None
+        data = None
+
+        if intent_name == "play.intent":
+            song_name = matches.get("song_name")
+            artist_name = matches.get("artist_name")
+            album_name = matches.get("album_name")
+            playlist_name = matches.get("playlist_name")
+
+            if playlist_name:
+                data = {"type": "playlist", "name": playlist_name}
+            elif song_name and album_name:
+                data = {"type": "song+album", "name": "%s %s" % (song_name, album_name)}
+            elif song_name and artist_name:
+                data = {"type": "song+artist", "name": "%s by %s" % (song_name, artist_name)}
+            elif song_name:
+                data = {"type": "song", "name": song_name}
+            elif album_name:
+                data = {"type": "album", "name": album_name}
+            elif artist_name:
+                data = {"type": "artist", "name": artist_name}
+
+            if intent_data.conf == 1.0:
+                level = CPSMatchLevel.EXACT
+            elif intent_data.conf > conf_threshold:
+                level = CPSMatchLevel.MULTI_KEY
+            else:
+                level = CPSMatchLevel.TITLE
+
+        if client_specified and data:
+            level = CPSMatchLevel.EXACT
+
+        return phrase, level, data
 
 
     def CPS_start(self, phrase, data):

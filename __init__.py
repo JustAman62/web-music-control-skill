@@ -3,6 +3,7 @@ import re
 from mycroft import intent_file_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus.message import Message
+from mycroft.skills.padatious_service import PadatiousService
 
 # When a query is not fulfilled
 NOTHING_FOUND = (CPSMatchLevel.GENERIC, None)
@@ -13,6 +14,8 @@ class WebMusicControl(CommonPlaySkill):
         super(WebMusicControl, self).__init__()
         self.regexes = {}
         self.is_playing = True
+        self.padatious: PadatiousService = PadatiousService.instance
+
 
     # region OVERRIDDEN METHODS
 
@@ -25,6 +28,10 @@ class WebMusicControl(CommonPlaySkill):
                 return phrase, CPSMatchLevel.GENERIC
             else:
                 return None
+
+        data = self.padatious.calc_intent(phrase)
+        self.log.info("padatious intent parse")
+        self.log.info(data)
 
         # TODO: Maybe support more client names
         client_specified = 'apple music' in phrase

@@ -16,7 +16,9 @@ class WebMusicControl(CommonPlaySkill):
         self.regexes = {}
         self.is_playing = True
         self.intent_container: IntentContainer = IntentContainer('play_intent_cache')
-        self.add_intents_from_file("playlist.intent")
+        self.add_intents_from_file("play.intent")
+        self.add_intents_from_file("play.something.intent")
+        self.add_intents_from_file("continue.intent")
         self.log.info("Training play intent parser")
         self.intent_container.train()
         self.log.info("Done Training")
@@ -38,9 +40,6 @@ class WebMusicControl(CommonPlaySkill):
                 return phrase, CPSMatchLevel.GENERIC
             else:
                 return None
-        data = self.intent_container.calc_intent("play " + phrase)
-        self.log.info("padatious intent parse")
-        self.log.info(data)
 
         # TODO: Maybe support more client names
         client_specified = 'apple music' in phrase
@@ -49,23 +48,10 @@ class WebMusicControl(CommonPlaySkill):
         # Remove the 'on client' part of the phrase
         phrase = re.sub(self.translate_regex('on_client'), '', phrase)
 
-        confidence, data = self.continue_playback_query(phrase, bonus)
-        if not data:
-            confidence, data = self.specific_query(phrase, bonus)
-        if not data:
-            self.log.info("Not enough information to request playback")
-            return None
+        intent_data = self.intent_container.calc_intent("play " + phrase)
+        self.log.info("padatious intent parse results")
+        self.log.info(intent_data)
 
-        if data.get('type') == "continue":
-            if client_specified:
-                return phrase, CPSMatchLevel.EXACT, data
-            else:
-                return phrase, CPSMatchLevel.GENERIC, data
-        elif data.get('type') is not None:
-            if client_specified:
-                return phrase, CPSMatchLevel.EXACT, data
-            else:
-                return phrase, CPSMatchLevel.MULTI_KEY, data
 
     def CPS_start(self, phrase, data):
         self.log.debug("Attempting to request playback on web client")

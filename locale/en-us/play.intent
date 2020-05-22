@@ -8,8 +8,7 @@ play {song_name}
 play (the | my) album {album_name}
 play (the | my) {album_name} album
 
-play songs by {artist_name}
-play something by {artist_name}
+play (songs | something | anything) by {artist_name}
 play {artist_name} songs
 
 play {song_name} by {artist_name}

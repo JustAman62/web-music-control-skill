@@ -1,0 +1,2 @@
+play (songs|something|anything) by {artist_name}.
+play {song_name} by {artist_name}.

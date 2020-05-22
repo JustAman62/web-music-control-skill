@@ -4,6 +4,7 @@ from mycroft import intent_file_handler
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus.message import Message
 from mycroft.skills.padatious_service import PadatiousService
+from padatious import IntentContainer
 
 # When a query is not fulfilled
 NOTHING_FOUND = (CPSMatchLevel.GENERIC, None)
@@ -14,8 +15,17 @@ class WebMusicControl(CommonPlaySkill):
         super(WebMusicControl, self).__init__()
         self.regexes = {}
         self.is_playing = True
-        self.padatious: PadatiousService = PadatiousService.instance
+        self.intent_container: IntentContainer = IntentContainer('play_intent_cache')
+        self.add_intents_from_file("playlist.intent")
+        self.log.info("Training play intent parser")
+        self.intent_container.train()
+        self.log.info("Done Training")
 
+    def add_intents_from_file(self,intent_file_name):
+        intent_file_path = self.find_resource(intent_file_name, "vocab")
+        with open(intent_file_path) as file:
+            intents = file.readlines()
+            self.intent_container.add_intent(intent_file_name, intents)
 
     # region OVERRIDDEN METHODS
 
@@ -28,14 +38,13 @@ class WebMusicControl(CommonPlaySkill):
                 return phrase, CPSMatchLevel.GENERIC
             else:
                 return None
-        self.log.info(self.padatious.registered_intents)
-        data = self.padatious.calc_intent(phrase)
+        data = self.intent_container.calc_intent("play " + phrase)
         self.log.info("padatious intent parse")
         self.log.info(data)
 
         # TODO: Maybe support more client names
         client_specified = 'apple music' in phrase
-        bonus = 0.5 if client_specified else 0.0
+        bonus = 0.5 if client_specified else 0.1
 
         # Remove the 'on client' part of the phrase
         phrase = re.sub(self.translate_regex('on_client'), '', phrase)

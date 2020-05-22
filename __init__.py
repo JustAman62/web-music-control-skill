@@ -5,7 +5,7 @@ from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.messagebus.message import Message
 
 # When a query is not fulfilled
-NOTHING_FOUND = (CPSMatchLevel.GENERIC, {'type': 'something'})
+NOTHING_FOUND = (CPSMatchLevel.GENERIC, None)
 
 
 class WebMusicControl(CommonPlaySkill):
@@ -41,7 +41,7 @@ class WebMusicControl(CommonPlaySkill):
         if not data:
             confidence, data = self.specific_query(phrase, bonus)
         if not data:
-            self.log.log("Not enough information to request playback")
+            self.log.info("Not enough information to request playback")
             return None
 
         if data.get('type') == "continue":
@@ -68,7 +68,6 @@ class WebMusicControl(CommonPlaySkill):
             # TODO: Listen for web client response to tailor speech
             self.speak_dialog('Playing')
 
-
     # endregion
 
     # region QUERY
@@ -79,7 +78,6 @@ class WebMusicControl(CommonPlaySkill):
             return 1.0, {'type': 'continue'}
         else:
             return NOTHING_FOUND
-
 
     def specific_query(self, phrase, bonus):
         """
@@ -125,7 +123,6 @@ class WebMusicControl(CommonPlaySkill):
 
         return NOTHING_FOUND
 
-
     # endregion
     # region UTIL
 
@@ -137,7 +134,6 @@ class WebMusicControl(CommonPlaySkill):
         """
         # TODO: Check if client is connected
         return True
-
 
     def translate_regex(self, regex_name):
         if regex_name not in self.regexes:

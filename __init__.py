@@ -15,19 +15,32 @@ class WebMusicControl(CommonPlaySkill):
         super(WebMusicControl, self).__init__()
         self.regexes = {}
         self.is_playing = True
+
         self.intent_container: IntentContainer = IntentContainer('play_intent_cache')
-        self.add_intents_from_file("play.intent")
-        self.add_intents_from_file("play.something.intent")
-        self.add_intents_from_file("continue.intent")
+        self.add_intents_from_file("play.song.intent")
+        self.add_intents_from_file("play.album.intent")
+        self.add_intents_from_file("play.artist.intent")
+        self.add_intents_from_file("play.playlist.intent")
+
+        self.add_entity_from_file("song_name.entity")
+        self.add_entity_from_file("playlist_name.entity")
+        # self.add_intents_from_file("play.something.intent")
+        # self.add_intents_from_file("continue.intent")
         self.log.info("Training play intent parser")
         self.intent_container.train()
         self.log.info("Done Training")
 
-    def add_intents_from_file(self,intent_file_name):
+    def add_intents_from_file(self, intent_file_name):
         intent_file_path = self.find_resource(intent_file_name, "vocab")
         with open(intent_file_path) as file:
             intents = file.readlines()
             self.intent_container.add_intent(intent_file_name, intents)
+
+    def add_entity_from_file(self, entity_file_name):
+        entity_file_path = self.find_resource(entity_file_name, "vocab")
+        with open(entity_file_path) as file:
+            intents = file.readlines()
+            self.intent_container.add_entity(entity_file_name, intents)
 
     # region OVERRIDDEN METHODS
 
@@ -47,7 +60,7 @@ class WebMusicControl(CommonPlaySkill):
 
         # Remove the 'on client' part of the phrase
         phrase = re.sub(self.translate_regex('on_client'), '', phrase)
-
+        print(phrase)
         intent_data = self.intent_container.calc_intent("play " + phrase)
         self.log.info("padatious intent parse results")
         self.log.info(intent_data)
@@ -56,12 +69,12 @@ class WebMusicControl(CommonPlaySkill):
             self.log.info("Intent confidence too low")
             return None
 
-        intent_name = intent_data.name
+        intent_name: str = intent_data.name
         matches = intent_data.matches
         level = None
         data = None
 
-        if intent_name == "play.intent":
+        if intent_name.startswith("play."):
             song_name = matches.get("song_name")
             artist_name = matches.get("artist_name")
             album_name = matches.get("album_name")
@@ -70,15 +83,15 @@ class WebMusicControl(CommonPlaySkill):
             if playlist_name:
                 data = {"type": "playlist", "name": playlist_name}
             elif song_name and album_name:
-                data = {"type": "song+album", "name": "%s %s" % (song_name, album_name)}
+                data = {"type": "songs+albums", "name": "%s %s" % (song_name, album_name)}
             elif song_name and artist_name:
-                data = {"type": "song+artist", "name": "%s by %s" % (song_name, artist_name)}
+                data = {"type": "songs+artists", "name": "%s by %s" % (song_name, artist_name)}
             elif song_name:
-                data = {"type": "song", "name": song_name}
+                data = {"type": "songs", "name": song_name}
             elif album_name:
-                data = {"type": "album", "name": album_name}
+                data = {"type": "albums", "name": album_name}
             elif artist_name:
-                data = {"type": "artist", "name": artist_name}
+                data = {"type": "artists", "name": artist_name}
 
             if intent_data.conf == 1.0:
                 level = CPSMatchLevel.EXACT

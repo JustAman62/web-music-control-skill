@@ -1,1 +1,1 @@
-the (album|record) (?P<album>.+)
+(the|) (album|record) (?P<album>.+)

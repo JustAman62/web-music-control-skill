@@ -1,1 +1,1 @@
-(the|my) (apple music |)playlist (?P<playlist>.+)
+((the|my|)\s*(apple music|apple|)\s*playlist\s*(?P<playlist>.+))

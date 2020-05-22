@@ -16,10 +16,6 @@ class WebMusicControl(CommonPlaySkill):
 
     # region OVERRIDDEN METHODS
 
-    @intent_file_handler('control.music.web.intent')
-    def handle_control_music_web(self, message):
-        self.speak_dialog('control.music.web')
-
     def CPS_match_query_phrase(self, phrase):
         """Handler for common play framework play query."""
         # A client must be connected to play anything

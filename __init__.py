@@ -77,7 +77,6 @@ class WebMusicControl(CommonPlaySkill):
         """Checks the given phrase to determine if it is asking to continue playback on the client"""
         if phrase.strip() == 'apple music':
             return 1.0, {'type': 'continue'}
-
         else:
             return NOTHING_FOUND
 
@@ -118,6 +117,10 @@ class WebMusicControl(CommonPlaySkill):
             song = match.groupdict()['track']
             return 1.0, {'type': 'song', 'name': song}
 
+        # Play some random artist/playlist/something they like etc
+        match = re.match(self.translate_regex('something'), phrase)
+        if match:
+            return 1.0, {'type': 'something'}
         # TODO: Support song+artist and album+artist combinations
 
         return NOTHING_FOUND

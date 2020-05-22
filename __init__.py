@@ -28,7 +28,7 @@ class WebMusicControl(CommonPlaySkill):
                 return phrase, CPSMatchLevel.GENERIC
             else:
                 return None
-
+        self.log.info(self.padatious.registered_intents)
         data = self.padatious.calc_intent(phrase)
         self.log.info("padatious intent parse")
         self.log.info(data)
